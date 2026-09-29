@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
+import 'routes/app_routes.dart';
 
-import 'screens/login_screen.dart';
-import 'theme/app_colors.dart';
+void main() {
+  runApp(const MyApp());
+}
 
-void main() => runApp(const PoskoSyncApp());
-
-class PoskoSyncApp extends StatelessWidget {
-  const PoskoSyncApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PoskoSync',
-      debugShowCheckedModeBanner: false,
+      title: 'Koordinasi Bantuan Bencana',
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.surface,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary, primary: AppColors.primary),
       ),
-      home: const LoginScreen(),
+      initialRoute: AppRoutes.login,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      onUnknownRoute: AppRoutes.onUnknownRoute,
     );
   }
 }

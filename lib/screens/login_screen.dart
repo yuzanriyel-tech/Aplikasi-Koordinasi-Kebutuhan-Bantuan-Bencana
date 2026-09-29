@@ -1,56 +1,86 @@
 import 'package:flutter/material.dart';
-
-import '../theme/app_colors.dart';
-import '../widgets/posko_widgets.dart';
-import 'home_screen.dart';
+import '../utils/validators.dart';
+import '../routes/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // (1) key untuk Form dan controller untuk setiap field
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // (2) buang controller saat layar ditutup
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _login() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute<void>(builder: (_) => const HomeScreen()));
+  // (3) dijalankan saat tombol Masuk ditekan
+  void _submit() {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) return; // ada isian yang salah -> berhenti
+
+    // Isian benar -> pindah ke Home, Login dibuang dari stack
+    Navigator.pushReplacementNamed(context, AppRoutes.home);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 44),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight - 88),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const PoskoLogo(),
-                    const SizedBox(height: 88),
-                    PoskoTextField(controller: _usernameController, hintText: 'Username', validator: _required),
-                    const SizedBox(height: 36),
-                    PoskoTextField(controller: _passwordController, hintText: 'Password', obscureText: true, validator: _required),
-                    const SizedBox(height: 64),
-                    PoskoPrimaryButton(label: 'Login', onPressed: _login),
-                  ],
-                ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            // (4) bungkus field dengan Form
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Masuk',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // (5) TextFormField + validator
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: Validators.email,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: Validators.password,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // (6) tombol memanggil _submit
+                  FilledButton(
+                    onPressed: _submit,
+                    child: const Text('Masuk'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -58,6 +88,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  String? _required(String? value) => value == null || value.trim().isEmpty ? 'Wajib diisi' : null;
 }
