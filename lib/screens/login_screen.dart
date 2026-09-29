@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-
+import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
+import '../utils/validators.dart';
 import '../widgets/posko_widgets.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -22,9 +23,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute<void>(builder: (_) => const HomeScreen()));
+     void _submit() {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    // Isian benar -> pindah ke Home, Login dibuang dari stack
+    Navigator.pushReplacementNamed(context, AppRoutes.home);
   }
 
   @override
@@ -39,16 +43,27 @@ class _LoginScreenState extends State<LoginScreen> {
               constraints: BoxConstraints(minHeight: constraints.maxHeight - 88),
               child: Form(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const PoskoLogo(),
                     const SizedBox(height: 88),
-                    PoskoTextField(controller: _usernameController, hintText: 'Username', validator: _required),
+                    PoskoTextField(
+                      controller: _usernameController,
+                      hintText: 'Username',
+                      validator: (value) =>
+                          Validators.minLength(value, 3, fieldName: 'Username'),
+                    ),
                     const SizedBox(height: 36),
-                    PoskoTextField(controller: _passwordController, hintText: 'Password', obscureText: true, validator: _required),
+                    PoskoTextField(
+                      controller: _passwordController,
+                      hintText: 'Password',
+                      obscureText: true,
+                      validator: Validators.password,
+                    ),
                     const SizedBox(height: 64),
-                    PoskoPrimaryButton(label: 'Login', onPressed: _login),
+                    PoskoPrimaryButton(label: 'Login', onPressed: _submit),
                   ],
                 ),
               ),
@@ -58,6 +73,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  String? _required(String? value) => value == null || value.trim().isEmpty ? 'Wajib diisi' : null;
 }

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
-
+import '../routes/app_routes.dart';
+import '../data/item_repository.dart';
+import '../models/item.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/posko_widgets.dart';
+import '../widgets/state_view.dart';
+
+// (1) status tampilan
+enum ViewStatus { loading, success, error }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,11 +23,46 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _urgency;
   bool _hasPhoto = false;
 
+  // (2) variabel state
+  final _repository = ItemRepository();
+  ViewStatus _status = ViewStatus.loading;
+  List<Item> _items = [];
+  String _errorMessage = '';
+  bool _simulateError = false; // ubah ke true untuk menguji error state
+
+  // (3) ambil data saat layar pertama kali dibuka
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+  }
+
   @override
   void dispose() {
     _typeController.dispose();
     _quantityController.dispose();
     super.dispose();
+  }
+
+  // (4) mengambil data + menangani error
+  Future<void> _loadItems() async {
+    if (_status != ViewStatus.loading) {
+      setState(() => _status = ViewStatus.loading);
+    }
+    try {
+      final items = await _repository.fetchItems(simulateError: _simulateError);
+      if (!mounted) return;
+      setState(() {
+        _items = items;
+        _status = ViewStatus.success;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _status = ViewStatus.error;
+      });
+    }
   }
 
   void _submitNeed() {
@@ -58,39 +99,49 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: contentWidth),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text('Input Kebutuhan Bantuan', textAlign: TextAlign.center, style: AppTextStyles.pageTitle),
-                        const SizedBox(height: 28),
-                        _fieldLabel('Jenis Kebutuhan'),
-                        PoskoTextField(controller: _typeController, hintText: 'Contoh: Air mineral', validator: _required),
-                        const SizedBox(height: 20),
-                        _fieldLabel('Jumlah'),
-                        PoskoTextField(controller: _quantityController, hintText: 'Masukkan jumlah', keyboardType: TextInputType.number, validator: _required),
-                        const SizedBox(height: 20),
-                        _fieldLabel('Tingkat Urgensi'),
-                        DropdownButtonFormField<String>(
-                          initialValue: _urgency,
-                          isExpanded: true,
-                          decoration: _dropdownDecoration(),
-                          hint: const Text('Pilih tingkat urgensi', style: AppTextStyles.fieldLabel),
-                          items: const [
-                            DropdownMenuItem(value: 'Tinggi', child: Text('Tinggi')),
-                            DropdownMenuItem(value: 'Sedang', child: Text('Sedang')),
-                            DropdownMenuItem(value: 'Rendah', child: Text('Rendah')),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text('Input Kebutuhan Bantuan', textAlign: TextAlign.center, style: AppTextStyles.pageTitle),
+                            const SizedBox(height: 28),
+                            _fieldLabel('Jenis Kebutuhan'),
+                            PoskoTextField(controller: _typeController, hintText: 'Contoh: Air mineral', validator: _required),
+                            const SizedBox(height: 20),
+                            _fieldLabel('Jumlah'),
+                            PoskoTextField(controller: _quantityController, hintText: 'Masukkan jumlah', keyboardType: TextInputType.number, validator: _required),
+                            const SizedBox(height: 20),
+                            _fieldLabel('Tingkat Urgensi'),
+                            DropdownButtonFormField<String>(
+                              initialValue: _urgency,
+                              isExpanded: true,
+                              decoration: _dropdownDecoration(),
+                              hint: const Text('Pilih tingkat urgensi', style: AppTextStyles.fieldLabel),
+                              items: const [
+                                DropdownMenuItem(value: 'Tinggi', child: Text('Tinggi')),
+                                DropdownMenuItem(value: 'Sedang', child: Text('Sedang')),
+                                DropdownMenuItem(value: 'Rendah', child: Text('Rendah')),
+                              ],
+                              onChanged: (value) => setState(() => _urgency = value),
+                            ),
+                            const SizedBox(height: 20),
+                            _fieldLabel('Foto'),
+                            _PhotoPicker(hasPhoto: _hasPhoto, onPressed: () => setState(() => _hasPhoto = !_hasPhoto)),
+                            const SizedBox(height: 30),
+                            Align(alignment: Alignment.center, child: PoskoPrimaryButton(label: 'Kirim', onPressed: _submitNeed)),
                           ],
-                          onChanged: (value) => setState(() => _urgency = value),
                         ),
-                        const SizedBox(height: 20),
-                        _fieldLabel('Foto'),
-                        _PhotoPicker(hasPhoto: _hasPhoto, onPressed: () => setState(() => _hasPhoto = !_hasPhoto)),
-                        const SizedBox(height: 30),
-                        Align(alignment: Alignment.center, child: PoskoPrimaryButton(label: 'Kirim', onPressed: _submitNeed)),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 36),
+                      const Text('Daftar Kebutuhan', textAlign: TextAlign.center, style: AppTextStyles.pageTitle),
+                      const SizedBox(height: 16),
+                      // (5) isi bagian ini tergantung status
+                      _buildContent(),
+                    ],
                   ),
                 ),
               ),
@@ -99,6 +150,48 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: Container(height: 22, color: AppColors.primary),
+    );
+  }
+
+  // (6) memilih tampilan: loading / error / empty / daftar data
+  Widget _buildContent() {
+    return switch (_status) {
+      ViewStatus.loading => const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: LoadingView(),
+        ),
+      ViewStatus.error => ErrorView(message: _errorMessage, onRetry: _loadItems),
+      ViewStatus.success => _buildList(),
+    };
+  }
+
+  Widget _buildList() {
+    if (_items.isEmpty) {
+      return const EmptyView(message: 'Belum ada data.');
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _items.length,
+      itemBuilder: (context, index) {
+        final item = _items[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            title: Text(item.title),
+            subtitle: Text(item.subtitle),
+            trailing: const Icon(Icons.chevron_right),
+            // PERUBAHAN DI SINI: Memicu navigasi dan mengirim data item
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.detail,
+                arguments: item,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
