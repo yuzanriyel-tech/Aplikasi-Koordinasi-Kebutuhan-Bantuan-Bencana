@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(title: const Text('Kebutuhan Bantuan')),
       body: _buildContent(), // (5) isi layar tergantung status
     );
   }
@@ -69,23 +69,38 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_items.isEmpty) {
       return const EmptyView(message: 'Belum ada data.');
     }
+    final colorScheme = Theme.of(context).colorScheme;
     return ListView.builder(
+      padding: const EdgeInsets.all(16),
       itemCount: _items.length,
       itemBuilder: (context, index) {
         final item = _items[index];
-        return ListTile(
-          title: Text(item.title),
-          subtitle: Text(item.subtitle),
-          trailing: const Icon(Icons.chevron_right),
-          // (7) SEMENTARA kosong, diisi di Langkah 7
-          onTap: () => Navigator.pushNamed(
-            context,
-            AppRoutes.detail,
-            arguments: item,
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: CircleAvatar(
+              backgroundColor: colorScheme.primaryContainer,
+              child: Icon(
+                Icons.inventory_2_outlined,
+                color: colorScheme.onPrimaryContainer,
+              ),
+            ),
+            title: Text(
+              item.title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(item.subtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(
+              context,
+              AppRoutes.detail,
+              arguments: item,
+            ),
           ),
         );
       },
     );
-  }
-  
+  }  
 }

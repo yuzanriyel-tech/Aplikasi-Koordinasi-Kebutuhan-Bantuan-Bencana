@@ -32,22 +32,51 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Di dalam State, data widget dibaca dengan "widget.item"
     final item = widget.item;
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text(item.title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(item.title, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 4),
-          Text(item.subtitle),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    item.subtitle,
+                    style: textTheme.bodyMedium
+                        ?.copyWith(color: colorScheme.primary),
+                  ),
+                  const Divider(height: 24),
+                  Text(item.description),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
-          Text(item.description),
-          const Divider(height: 32),
-          Text(
-            _catatan == null ? 'Belum ada catatan.' : 'Catatan: $_catatan',
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Catatan', style: textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text(_catatan ?? 'Belum ada catatan.'),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
