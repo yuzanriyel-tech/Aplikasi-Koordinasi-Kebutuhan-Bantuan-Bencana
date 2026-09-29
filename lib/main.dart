@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'screens/login_screen.dart';
+import 'routes/app_routes.dart';
 import 'theme/app_colors.dart';
 
 void main() => runApp(const PoskoSyncApp());
@@ -16,9 +15,15 @@ class PoskoSyncApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: AppColors.surface,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary, primary: AppColors.primary),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
+        ),
       ),
-      home: const LoginScreen(),
+      // Gunakan initialRoute dan onGenerateRoute menggantikan 'home'
+      initialRoute: AppRoutes.login,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      onUnknownRoute: AppRoutes.onUnknownRoute,
     );
   }
 }
