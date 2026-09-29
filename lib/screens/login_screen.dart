@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../utils/validators.dart';
 import '../widgets/posko_widgets.dart';
-import 'home_screen.dart';
+import '../routes/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,10 +23,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute<void>(builder: (_) => const HomeScreen()));
-  }
+void _login() {
+  final isValid = _formKey.currentState?.validate() ?? false;
+
+  if (!isValid) return;
+
+  Navigator.pushReplacementNamed(
+    context,
+    AppRoutes.home,
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +51,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const PoskoLogo(),
                     const SizedBox(height: 88),
-                    PoskoTextField(controller: _usernameController, hintText: 'Username', validator: _required),
+                    PoskoTextField(
+                      controller: _usernameController,
+                      hintText: 'Username',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: validateEmail,
+                    ),
                     const SizedBox(height: 36),
-                    PoskoTextField(controller: _passwordController, hintText: 'Password', obscureText: true, validator: _required),
+                    PoskoTextField(
+                    controller: _passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                    validator: validatePassword,
+                  ),
                     const SizedBox(height: 64),
                     PoskoPrimaryButton(label: 'Login', onPressed: _login),
                   ],
@@ -58,6 +75,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  String? _required(String? value) => value == null || value.trim().isEmpty ? 'Wajib diisi' : null;
 }
