@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../utils/validators.dart';
@@ -6,7 +7,6 @@ import '../widgets/posko_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -23,11 +23,11 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-     void _submit() {
+  void _login() {
     final isValid = _formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
+    if (!isValid) return; // ada isian salah -> berhenti
 
-    // Isian benar -> pindah ke Home, Login dibuang dari stack
+    // Login dibuang dari stack, diganti Home
     Navigator.pushReplacementNamed(context, AppRoutes.home);
   }
 
@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       validator: Validators.password,
                     ),
                     const SizedBox(height: 64),
-                    PoskoPrimaryButton(label: 'Login', onPressed: _submit),
+                    PoskoPrimaryButton(label: 'Login', onPressed: _login),
                   ],
                 ),
               ),
