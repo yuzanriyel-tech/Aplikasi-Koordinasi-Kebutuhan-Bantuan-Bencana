@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
-// Pastikan semua path import ini sesuai dengan nama folder/file kamu
-import '../models/item.dart'; 
+import '../models/item.dart';
+import '../screens/catatan_form_screen.dart';
+import '../screens/detail_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/not_found_screen.dart';
-import '../screens/detail_screen.dart'; 
-import '../screens/catatan_form_screen.dart'; // Sesuaikan jika nama file-nya tanpa 's' di belakang
 
 class AppRoutes {
   AppRoutes._();
 
   static const String login = '/login';
   static const String home = '/home';
-  static const String detail = '/detail'; 
-  static const String catatanForm = '/catatan-form'; 
+  static const String detail = '/detail';
+  static const String catatanForm = '/catatan-form';
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -28,7 +27,7 @@ class AppRoutes {
           builder: (_) => const HomeScreen(),
           settings: settings,
         );
-      case detail: // Tambahan Langkah 7
+      case detail:
         final args = settings.arguments;
         if (args is Item) {
           return MaterialPageRoute<void>(
@@ -36,8 +35,9 @@ class AppRoutes {
             settings: settings,
           );
         }
-        return null;
-      case catatanForm: // Perbaikan Langkah 8 (dipindah ke dalam switch)
+        return null; // data salah/kosong -> halaman 404
+      case catatanForm:
+        // <String> karena layar ini mengembalikan teks saat ditutup
         return MaterialPageRoute<String>(
           builder: (_) => const CatatanFormScreen(),
           settings: settings,
