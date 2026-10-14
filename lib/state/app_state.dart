@@ -3,6 +3,7 @@ import 'dart:io' show InternetAddress, SocketException;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vibration/vibration.dart';
 
 import '../data/item_repository.dart';
 
@@ -108,8 +109,26 @@ class AppState extends ChangeNotifier {
     _syncing = true;
     notifyListeners();
     await Future<void>.delayed(const Duration(milliseconds: 1500));
-    if (_online) ItemRepository.instance.markAllSynced();
+
+    // Jaringan putus di tengah proses: data tetap menunggu di antrean (NFR-08).
+    final success = _online;
+    if (success) ItemRepository.instance.markAllSynced();
+
     _syncing = false;
     notifyListeners();
+
+    // FR-19: getar hanya saat sinkronisasi benar-benar berhasil.
+    if (success) await _vibrateOnSyncSuccess();
+  }
+
+  /// Respons fisik saat sinkronisasi selesai (FR-19), memakai package `vibration`.
+  Future<void> _vibrateOnSyncSuccess() async {
+    try {
+      if (await Vibration.hasVibrator() == true) {
+        await Vibration.vibrate(duration: 500);
+      }
+    } catch (_) {
+      // Perangkat/emulator tanpa getar: abaikan, sinkronisasi tetap sukses.
+    }
   }
 }

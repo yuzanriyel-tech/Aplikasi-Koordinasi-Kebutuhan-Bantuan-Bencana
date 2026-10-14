@@ -38,6 +38,9 @@ dependencies:
   # Deteksi perubahan jaringan (Modul C, FR-16).
   connectivity_plus: ^6.1.0
 
+  # Getar saat sinkronisasi berhasil (Modul C, FR-19).
+  vibration: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -89,6 +92,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-dependencies:
-  vibration: ^2.0.0
