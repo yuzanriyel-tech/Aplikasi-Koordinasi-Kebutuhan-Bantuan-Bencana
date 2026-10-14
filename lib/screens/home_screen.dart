@@ -1,61 +1,44 @@
 import 'package:flutter/material.dart';
-import '../routes/app_routes.dart';
+
 import '../data/item_repository.dart';
-import '../models/item.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../utils/view_status.dart';
+import '../widgets/posko_bottom_nav.dart';
 import '../widgets/posko_widgets.dart';
 import '../widgets/state_view.dart';
+import '../widgets/status_widgets.dart';
 
-// (1) status tampilan
-enum ViewStatus { loading, success, error }
-
+/// Beranda: logo, indikator memuat, lalu ringkasan kebutuhan dan status koneksi.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _typeController = TextEditingController();
-  final _quantityController = TextEditingController();
-  String? _urgency;
-  bool _hasPhoto = false;
-
-  // (2) variabel state
+  // (1) variabel state
   final _repository = ItemRepository();
   ViewStatus _status = ViewStatus.loading;
-  List<Item> _items = [];
   String _errorMessage = '';
-  bool _simulateError = false; // ubah ke true untuk menguji error state
+  final bool _simulateError = false; // ubah ke true untuk menguji error state
 
-  // (3) ambil data saat layar pertama kali dibuka
+  // (2) ambil data saat layar pertama kali dibuka
   @override
   void initState() {
     super.initState();
     _loadItems();
   }
 
-  @override
-  void dispose() {
-    _typeController.dispose();
-    _quantityController.dispose();
-    super.dispose();
-  }
-
-  // (4) mengambil data + menangani error
+  // (3) mengambil data + menangani error
   Future<void> _loadItems() async {
     if (_status != ViewStatus.loading) {
       setState(() => _status = ViewStatus.loading);
     }
     try {
-      final items = await _repository.fetchItems(simulateError: _simulateError);
+      await _repository.fetchItems(simulateError: _simulateError);
       if (!mounted) return;
-      setState(() {
-        _items = items;
-        _status = ViewStatus.success;
-      });
+      setState(() => _status = ViewStatus.success);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -65,172 +48,112 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _submitNeed() {
-    if (!(_formKey.currentState?.validate() ?? false) || _urgency == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lengkapi tingkat urgensi kebutuhan.')));
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kebutuhan disimpan untuk dikirim ke server.')));
-    _formKey.currentState?.reset();
-    _typeController.clear();
-    _quantityController.clear();
-    setState(() {
-      _urgency = null;
-      _hasPhoto = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('PoskoSync', style: AppTextStyles.button),
-        actions: const [Padding(padding: EdgeInsets.only(right: 20), child: ConnectionStatus())],
-      ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final contentWidth = constraints.maxWidth > 500 ? 460.0 : constraints.maxWidth - 40;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 36),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: contentWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const Text('Input Kebutuhan Bantuan', textAlign: TextAlign.center, style: AppTextStyles.pageTitle),
-                            const SizedBox(height: 28),
-                            _fieldLabel('Jenis Kebutuhan'),
-                            PoskoTextField(controller: _typeController, hintText: 'Contoh: Air mineral', validator: _required),
-                            const SizedBox(height: 20),
-                            _fieldLabel('Jumlah'),
-                            PoskoTextField(controller: _quantityController, hintText: 'Masukkan jumlah', keyboardType: TextInputType.number, validator: _required),
-                            const SizedBox(height: 20),
-                            _fieldLabel('Tingkat Urgensi'),
-                            DropdownButtonFormField<String>(
-                              initialValue: _urgency,
-                              isExpanded: true,
-                              decoration: _dropdownDecoration(),
-                              hint: const Text('Pilih tingkat urgensi', style: AppTextStyles.fieldLabel),
-                              items: const [
-                                DropdownMenuItem(value: 'Tinggi', child: Text('Tinggi')),
-                                DropdownMenuItem(value: 'Sedang', child: Text('Sedang')),
-                                DropdownMenuItem(value: 'Rendah', child: Text('Rendah')),
-                              ],
-                              onChanged: (value) => setState(() => _urgency = value),
-                            ),
-                            const SizedBox(height: 20),
-                            _fieldLabel('Foto'),
-                            _PhotoPicker(hasPhoto: _hasPhoto, onPressed: () => setState(() => _hasPhoto = !_hasPhoto)),
-                            const SizedBox(height: 30),
-                            Align(alignment: Alignment.center, child: PoskoPrimaryButton(label: 'Kirim', onPressed: _submitNeed)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 36),
-                      const Text('Daftar Kebutuhan', textAlign: TextAlign.center, style: AppTextStyles.pageTitle),
-                      const SizedBox(height: 16),
-                      // (5) isi bagian ini tergantung status
-                      _buildContent(),
-                    ],
-                  ),
-                ),
+        child: Column(
+          children: [
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: ConnectionStatus(),
               ),
-            );
-          },
+            ),
+            Expanded(child: _buildContent()),
+          ],
         ),
       ),
-      bottomNavigationBar: Container(height: 22, color: AppColors.primary),
+      bottomNavigationBar: const PoskoBottomNav(currentIndex: 2),
     );
   }
 
-  // (6) memilih tampilan: loading / error / empty / daftar data
+  // (4) memilih tampilan: loading / error / ringkasan
   Widget _buildContent() {
     return switch (_status) {
-      ViewStatus.loading => const Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
-          child: LoadingView(),
-        ),
-      ViewStatus.error => ErrorView(message: _errorMessage, onRetry: _loadItems),
-      ViewStatus.success => _buildList(),
-    };
-  }
-
-  Widget _buildList() {
-    if (_items.isEmpty) {
-      return const EmptyView(message: 'Belum ada data.');
-    }
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _items.length,
-      itemBuilder: (context, index) {
-        final item = _items[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Text(item.title),
-            subtitle: Text(item.subtitle),
-            trailing: const Icon(Icons.chevron_right),
-            // PERUBAHAN DI SINI: Memicu navigasi dan mengirim data item
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.detail,
-                arguments: item,
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _fieldLabel(String label) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(label, textAlign: TextAlign.center, style: AppTextStyles.fieldLabel),
-      );
-
-  InputDecoration _dropdownDecoration() => InputDecoration(
-        filled: true,
-        fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: AppColors.primary)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: AppColors.primary)),
-      );
-
-  String? _required(String? value) => value == null || value.trim().isEmpty ? 'Wajib diisi' : null;
-}
-
-class _PhotoPicker extends StatelessWidget {
-  const _PhotoPicker({required this.hasPhoto, required this.onPressed});
-  final bool hasPhoto;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          height: 150,
-          decoration: BoxDecoration(border: Border.all(color: AppColors.primary), borderRadius: BorderRadius.circular(20)),
+      ViewStatus.loading => const Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(hasPhoto ? Icons.check_circle_outline : Icons.add_a_photo_outlined, size: 34, color: AppColors.accent),
-              const SizedBox(height: 8),
-              Text(hasPhoto ? 'Foto siap dilampirkan' : 'Ambil atau pilih foto', style: const TextStyle(fontFamily: 'monospace', color: AppColors.primary)),
+              PoskoLogo(),
+              SizedBox(height: 40),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 4,
+                  color: AppColors.amber,
+                  backgroundColor: AppColors.primaryTint,
+                ),
+              ),
             ],
           ),
         ),
-      );
+      ViewStatus.error => ErrorView(message: _errorMessage, onRetry: _loadItems),
+      ViewStatus.success => _buildSummary(),
+    };
+  }
+
+  Widget _buildSummary() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const PoskoLogo(size: 140),
+            const SizedBox(height: 28),
+            ListenableBuilder(
+              listenable: _repository,
+              builder: (context, _) => Row(
+                children: [
+                  _StatTile(label: 'Kebutuhan', value: _repository.items.length),
+                  const SizedBox(width: 12),
+                  _StatTile(label: 'Menunggu', value: _repository.pendingCount),
+                  const SizedBox(width: 12),
+                  _StatTile(label: 'Terkirim', value: _repository.sentCount),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const ConnectionBanner(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({required this.label, required this.value});
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.primaryTint,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Text(
+              '$value',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.text)),
+          ],
+        ),
+      ),
+    );
+  }
 }

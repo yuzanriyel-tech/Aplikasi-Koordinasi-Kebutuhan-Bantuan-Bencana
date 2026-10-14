@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "C:/Users/nurha/first_project/linux"
+    "cmake.sourceDirectory": "C:/Users/nurha/first_project/linux",
+    "java.compile.nullAnalysis.mode": "disabled"
 }
