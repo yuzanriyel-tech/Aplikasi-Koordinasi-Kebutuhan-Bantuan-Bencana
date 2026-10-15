@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Gambar peta untuk memilih lokasi posko. Memakai
-/// assets/images/map_placeholder.png (ekspor dari Figma); bila belum ada,
-/// tampil latar peta polos agar aplikasi tetap jalan.
-
 class MapImage extends StatelessWidget {
   const MapImage({super.key});
 

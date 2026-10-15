@@ -7,16 +7,8 @@ import 'package:vibration/vibration.dart';
 
 import '../data/item_repository.dart';
 
-/// Tiga status koneksi yang wajib selalu terlihat (NFR-07).
 enum ConnectionMode { online, offline, waitingSync }
 
-/// Status koneksi aplikasi + sinkronisasi otomatis.
-///
-/// Pemantauan jaringan (FR-16) memakai dua lapis:
-///  1. `connectivity_plus` memberi tahu saat Wi-Fi/seluler menyala atau mati.
-///  2. Pengecekan DNS memastikan internet benar-benar bisa dijangkau,
-///     bukan sekadar tersambung ke Wi-Fi tanpa internet.
-///
 class AppState extends ChangeNotifier {
   AppState._();
   static final AppState instance = AppState._();
@@ -25,13 +17,12 @@ class AppState extends ChangeNotifier {
   static const _probeTimeout = Duration(seconds: 3);
   static const _retryEvery = Duration(seconds: 10);
 
-  // Mulai offline sampai pengecekan pertama selesai.
   bool _online = false;
   bool _syncing = false;
 
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   Timer? _retryTimer;
-  int _checkId = 0; // untuk mengabaikan hasil cek yang sudah usang
+  int _checkId = 0; 
 
   bool get isOnline => _online;
 
@@ -43,7 +34,6 @@ class AppState extends ChangeNotifier {
 
   int get pendingCount => ItemRepository.instance.pendingCount;
 
-  /// Mulai memantau jaringan. Dipanggil sekali dari `main()`.
   Future<void> startMonitoring() async {
     if (_subscription != null) return;
     final connectivity = Connectivity();
@@ -69,17 +59,16 @@ class AppState extends ChangeNotifier {
     }
 
     final reachable = await _canReachInternet();
-    if (id != _checkId) return; // ada perubahan jaringan yang lebih baru
+    if (id != _checkId) return; 
     setOnline(reachable);
 
-    // Tersambung ke Wi-Fi/seluler tetapi tanpa internet: coba lagi berkala.
+    
     if (!reachable) {
       _retryTimer = Timer(_retryEvery, () => _onChanged(results));
     }
   }
 
   Future<bool> _canReachInternet() async {
-    // Di web tidak ada akses DNS; percayai status dari connectivity_plus.
     if (kIsWeb) return true;
     try {
       final found =
@@ -92,8 +81,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  /// Hanya untuk uji manual: tekan lama indikator koneksi. Berlaku sampai
-  /// jaringan berubah lagi.
   void toggleOnline() => setOnline(!_online);
 
   void setOnline(bool value) {
@@ -103,32 +90,27 @@ class AppState extends ChangeNotifier {
     if (value) syncNow();
   }
 
-  /// Dipanggil saat koneksi kembali atau setelah ada data baru saat online.
   Future<void> syncNow() async {
     if (!_online || _syncing || pendingCount == 0) return;
     _syncing = true;
     notifyListeners();
     await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-    // Jaringan putus di tengah proses: data tetap menunggu di antrean (NFR-08).
     final success = _online;
     if (success) ItemRepository.instance.markAllSynced();
 
     _syncing = false;
     notifyListeners();
 
-    // FR-19: getar hanya saat sinkronisasi benar-benar berhasil.
     if (success) await _vibrateOnSyncSuccess();
   }
 
-  /// Respons fisik saat sinkronisasi selesai (FR-19), memakai package `vibration`.
   Future<void> _vibrateOnSyncSuccess() async {
     try {
       if (await Vibration.hasVibrator() == true) {
         await Vibration.vibrate(duration: 500);
       }
     } catch (_) {
-      // Perangkat/emulator tanpa getar: abaikan, sinkronisasi tetap sukses.
     }
   }
 }

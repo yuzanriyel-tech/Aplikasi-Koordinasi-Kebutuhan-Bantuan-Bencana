@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
-/// Dialog seragam untuk pesan error dan konfirmasi
-/// (halaman Error Message dan Information di Figma).
-/// Mengembalikan true bila tombol konfirmasi ditekan, false bila batal.
 Future<bool?> showPoskoDialog(
   BuildContext context, {
   required String title,

@@ -1,12 +1,9 @@
 import '../models/posko_location.dart';
 
-/// Penyimpanan akun sementara di memori, hanya agar alur Login/Daftar
-/// bisa didemokan. Diganti server mandiri saat Modul Dasar dikerjakan.
 class AuthRepository {
   AuthRepository._();
   static final AuthRepository instance = AuthRepository._();
 
-  /// Akun demo: nomor 081234567890, password password123.
   final Map<String, _Account> _accounts = {
     '081234567890': const _Account(
       name: 'Koordinator Demo',

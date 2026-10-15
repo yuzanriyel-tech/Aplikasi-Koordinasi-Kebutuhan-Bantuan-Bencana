@@ -17,9 +17,6 @@ enum SyncStatus {
   final String label;
 }
 
-/// Model data utama aplikasi: satu kebutuhan bantuan.
-/// Field title/subtitle/description dipertahankan agar layar detail
-/// dan daftar yang sudah ada tetap bisa membaca data ini.
 class Item {
   final String id;
   final String title; // jenis barang

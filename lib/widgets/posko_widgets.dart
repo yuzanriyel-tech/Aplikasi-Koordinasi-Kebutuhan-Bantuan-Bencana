@@ -5,7 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_dimens.dart';
 import '../theme/app_text_styles.dart';
 
-/// bila file belum ada, tampil logo pengganti agar aplikasi tetap jalan.
+
 class PoskoLogo extends StatelessWidget {
   const PoskoLogo({super.key, this.size = 180, this.showName = true});
   final double size;
@@ -51,7 +51,6 @@ class _LogoFallback extends StatelessWidget {
   }
 }
 
-/// Label di atas field, dengan penanda "(opsional)" bila perlu.
 class PoskoFieldLabel extends StatelessWidget {
   const PoskoFieldLabel(this.label, {super.key, this.optional = false});
   final String label;
@@ -99,7 +98,6 @@ InputDecoration poskoInputDecoration({String? hintText}) {
   );
 }
 
-/// Field teks seragam: label di atas, kotak 48 dp, sudut 12 dp.
 class PoskoTextField extends StatelessWidget {
   const PoskoTextField({
     required this.controller,
@@ -148,7 +146,6 @@ class PoskoTextField extends StatelessWidget {
   }
 }
 
-/// Tombol utama seragam: tinggi 56 dp, sudut 12 dp, lebar penuh.
 class PoskoPrimaryButton extends StatelessWidget {
   const PoskoPrimaryButton({required this.label, required this.onPressed, super.key});
   final String label;
@@ -174,8 +171,6 @@ class PoskoPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Indikator status koneksi (Online / Offline / Menunggu sinkronisasi).
-/// Tekan lama untuk mengganti Online/Offline saat simulasi.
 class ConnectionStatus extends StatelessWidget {
   const ConnectionStatus({super.key});
 
@@ -215,7 +210,6 @@ class ConnectionStatus extends StatelessWidget {
   }
 }
 
-/// Warna, ikon, dan teks untuk tiap status koneksi.
 ({Color background, Color foreground, IconData icon, String label})
     connectionStyle(ConnectionMode mode) {
   switch (mode) {

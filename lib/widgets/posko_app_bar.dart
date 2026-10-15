@@ -4,7 +4,6 @@ import '../theme/app_colors.dart';
 import '../theme/app_dimens.dart';
 import '../theme/app_text_styles.dart';
 
-/// App bar seragam: tinggi 64 dp, judul 20 dp, garis tipis di bawah.
 class PoskoAppBar extends StatelessWidget implements PreferredSizeWidget {
   const PoskoAppBar({
     super.key,

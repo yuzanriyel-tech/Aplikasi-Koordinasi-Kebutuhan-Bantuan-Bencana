@@ -1,7 +1,3 @@
-/// Kumpulan fungsi validasi yang bisa dipakai ulang (reusable).
-/// Aturan validator di Flutter:
-/// - return null -> input VALID
-/// - return 'pesan' -> input TIDAK VALID, pesan tampil di bawah field
 class Validators {
   Validators._();
 
@@ -12,12 +8,12 @@ class Validators {
     return null;
   }
 
-  static String? email(String? value) {
-    final requiredError = requiredField(value, fieldName: 'Email');
+  static String? phone(String? value) {
+    final requiredError = requiredField(value, fieldName: 'Nomor telepon');
     if (requiredError != null) return requiredError;
-    final emailRegex = RegExp(r'^[\w.+-]+@[\w-]+(\.[\w-]+)+$');
-    if (!emailRegex.hasMatch(value!.trim())) {
-      return 'Format email tidak valid';
+    final phoneRegex = RegExp(r'^(\+62|62|0)[0-9]{8,13}$');
+    if (!phoneRegex.hasMatch(value!.trim())) {
+      return 'Nomor telepon tidak valid';
     }
     return null;
   }
@@ -41,34 +37,12 @@ class Validators {
     return null;
   }
 
-  static String? rating(String? value) {
-    final requiredError = requiredField(value, fieldName: 'Rating');
-    if (requiredError != null) return requiredError;
-    final number = int.tryParse(value!.trim());
-    if (number == null) return 'Rating harus berupa angka';
-    if (number < 1 || number > 5) return 'Rating harus di antara 1 sampai 5';
-    return null;
-  }
-
-  /// Nomor telepon Indonesia: 08xx..., 62xx..., atau +62xx... (9-15 digit).
-  static String? phone(String? value) {
-    final requiredError = requiredField(value, fieldName: 'Nomor telepon');
-    if (requiredError != null) return requiredError;
-    final phoneRegex = RegExp(r'^(\+62|62|0)[0-9]{8,13}$');
-    if (!phoneRegex.hasMatch(value!.trim())) {
-      return 'Nomor telepon tidak valid';
-    }
-    return null;
-  }
-
-  /// Ulangi password: harus sama dengan password asli.
   static String? confirmPassword(String? value, String original) {
     if (value == null || value.isEmpty) return 'Ulangi password wajib diisi';
     if (value != original) return 'Password tidak sama';
     return null;
   }
 
-  /// Jumlah barang: bilangan bulat lebih dari 0.
   static String? quantity(String? value) {
     final requiredError = requiredField(value, fieldName: 'Jumlah');
     if (requiredError != null) return requiredError;

@@ -35,10 +35,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
-  # Deteksi perubahan jaringan (Modul C, FR-16).
+  # Deteksi perubahan jaringan
   connectivity_plus: ^6.1.0
 
-  # Getar saat sinkronisasi berhasil (Modul C, FR-19).
+  # Getar saat sinkronisasi berhasil
   vibration: ^2.0.0
 
 dev_dependencies:
@@ -63,7 +63,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # Logo PoSync dan gambar peta (ekspor dari Figma) disimpan di sini.
+  # Logo PoSync
   assets:
     - assets/images/
 

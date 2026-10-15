@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Palet warna PoskoSync, diambil dari prototype Figma
-/// (Requirement List / Input / Edit) lalu dipakai di semua halaman.
 abstract final class AppColors {
   // Brand
   static const primary = Color(0xFFEB6442);
@@ -29,7 +27,7 @@ abstract final class AppColors {
   static const overlay = Color(0xCC49454F);
   static const danger = Color(0xFFDB1212);
 
-  // Indikator urgensi (Tinggi / Sedang / Rendah)
+  // Indikator urgensi 
   static const urgencyHighBg = Color(0x38FA0909);
   static const urgencyHighFg = Color(0xFFA90000);
   static const urgencyHighBorder = Color(0xFFE02D2D);
@@ -50,7 +48,7 @@ abstract final class AppColors {
   static const syncPendingText = Color(0xFFC2622F);
   static const syncSent = Color(0xFF6E9A92);
 
-  // Indikator status koneksi (Online / Offline / Menunggu sinkronisasi)
+  // Indikator status koneksi 
   static const onlineBg = Color(0xFFE3F4E8);
   static const onlineFg = Color(0xFF1F7A3E);
   static const offlineBg = Color(0xFFFFE4D6);

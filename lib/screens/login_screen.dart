@@ -37,7 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
     if (success) {
-      // Isian benar -> pindah ke Beranda, Login dibuang dari stack
       Navigator.pushReplacementNamed(context, AppRoutes.home);
       return;
     }

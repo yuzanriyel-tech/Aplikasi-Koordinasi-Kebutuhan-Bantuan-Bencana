@@ -1,5 +1,4 @@
-/// Ukuran komponen, diambil dari prototype Figma
-/// (Requirement List / Input / Edit) dan dipakai seragam di semua halaman.
+/// Ukuran komponen
 abstract final class AppDimens {
   static const double screenPadding = 22;
   static const double fieldHeight = 48;

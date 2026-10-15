@@ -7,8 +7,7 @@ import '../theme/app_text_styles.dart';
 import '../utils/format.dart';
 import 'status_widgets.dart';
 
-/// Kartu satu kebutuhan bantuan (gaya prototype Requirement List).
-/// [showMeta] menambahkan koordinat GPS dan waktu input (halaman Antrean).
+/// Kartu kebutuhan bantuan 
 class NeedCard extends StatelessWidget {
   const NeedCard({
     super.key,
@@ -16,7 +15,7 @@ class NeedCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
-    this.showMeta = false,
+    this.showMeta = false, ///GPS
   });
 
   final Item item;

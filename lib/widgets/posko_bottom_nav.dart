@@ -15,8 +15,6 @@ class _NavTab {
   const _NavTab(this.label, this.icon, this.route, {this.showPendingBadge = false});
 }
 
-/// Navigasi bawah: Kebutuhan, Antrean, Beranda, Riwayat, Distribusi.
-/// Tab Antrean menampilkan lencana jumlah data yang menunggu dikirim.
 class PoskoBottomNav extends StatelessWidget {
   const PoskoBottomNav({super.key, required this.currentIndex});
 

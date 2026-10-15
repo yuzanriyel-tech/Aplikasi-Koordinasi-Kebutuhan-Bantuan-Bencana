@@ -89,7 +89,7 @@ class AppRoutes {
       case catatanForm:
         return _page<String>(settings, const CatatanFormScreen());
       default:
-        return null; // route tidak terdaftar -> halaman 404
+        return null; 
     }
   }
 
