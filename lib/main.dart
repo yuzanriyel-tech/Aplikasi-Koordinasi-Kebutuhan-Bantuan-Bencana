@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'screens/login_screen.dart';
-import 'theme/app_colors.dart';
+import 'routes/app_routes.dart';
+import 'theme/posync_colors.dart';
 
-void main() => runApp(const PoskoSyncApp());
+void main() {
+  runApp(const PoskoSyncApp());
+}
 
 class PoskoSyncApp extends StatelessWidget {
   const PoskoSyncApp({super.key});
@@ -11,14 +13,51 @@ class PoskoSyncApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PoskoSync',
+      title: 'PoskoSync - Modul A',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.surface,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary, primary: AppColors.primary),
+        colorScheme: ColorScheme.fromSeed(seedColor: PosyncColors.primary),
+        scaffoldBackgroundColor: PosyncColors.background,
       ),
-      home: const LoginScreen(),
+      initialRoute: AppRoutes.daftar,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      onUnknownRoute: AppRoutes.onUnknownRoute,
+      // Bingkai layar HP supaya tampil seperti di HP saat dibuka di Chrome.
+      // Hapus baris "builder" ini kalau mau layar penuh.
+      builder: (context, child) => _BingkaiHp(child: child ?? const SizedBox.shrink()),
+    );
+  }
+}
+
+class _BingkaiHp extends StatelessWidget {
+  final Widget child;
+  const _BingkaiHp({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: const Color(0xFFEAF0FA),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double tinggi = constraints.maxHeight - 32;
+          if (tinggi > 800) tinggi = 800;
+          if (tinggi < 400) tinggi = 400;
+          return Center(
+            child: Container(
+              width: 380,
+              height: tinggi,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: PosyncColors.background,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: PosyncColors.border),
+              ),
+              child: child,
+            ),
+          );
+        },
+      ),
     );
   }
 }
