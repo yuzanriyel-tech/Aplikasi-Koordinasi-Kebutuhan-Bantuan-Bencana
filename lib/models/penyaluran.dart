@@ -4,7 +4,9 @@ class Penyaluran {
   final int jumlah;
   final String satuan;
   final DateTime tanggal;
-  final bool adaFoto;
+
+  // Path file foto serah terima (null = tidak ada foto)
+  final String? fotoPath;
 
   const Penyaluran({
     required this.namaPenerima,
@@ -12,6 +14,8 @@ class Penyaluran {
     required this.jumlah,
     required this.satuan,
     required this.tanggal,
-    required this.adaFoto,
+    this.fotoPath,
   });
+
+  bool get adaFoto => fotoPath != null;
 }

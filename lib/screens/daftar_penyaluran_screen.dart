@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../models/penyaluran.dart';
@@ -57,38 +59,65 @@ class _DaftarPenyaluranScreenState extends State<DaftarPenyaluranScreen> {
     return _formatTanggal(t);
   }
 
+  StokBarang _cariStok(String nama) => _stok.firstWhere((b) => b.nama == nama);
+
+  void _snack(String teks, Color warna) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(backgroundColor: warna, content: Text(teks)));
+  }
+
   // EVENT: tombol tambah ditekan
   Future<void> _tambah() async {
-    // NAVIGATION: kirim daftar stok ke form, tunggu hasil (result)
     final hasil = await Navigator.push<Penyaluran>(
       context,
       MaterialPageRoute(builder: (_) => FormPenyaluranScreen(stok: _stok)),
     );
 
-    if (hasil == null || !mounted) return; // user kembali tanpa menyimpan
+    if (hasil == null || !mounted) return;
 
     // STATE berubah: riwayat bertambah, stok tersalur bertambah (FR-28)
     setState(() {
       _riwayat.insert(0, hasil);
-      _stok.firstWhere((b) => b.nama == hasil.jenisBarang).tersalur +=
-          hasil.jumlah;
+      _cariStok(hasil.jenisBarang).tersalur += hasil.jumlah;
     });
 
-    // FEEDBACK sukses
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Penyaluran berhasil dicatat')),
+    _snack('Penyaluran berhasil dicatat', Colors.green);
+  }
+
+  // EDIT penyaluran (FR-28): kirim data lama ke form, terima data baru
+  Future<void> _edit(Penyaluran lama) async {
+    final baru = await Navigator.push<Penyaluran>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FormPenyaluranScreen(stok: _stok, awal: lama),
+      ),
     );
+
+    if (baru == null || !mounted) return;
+
+    setState(() {
+      // 1) kembalikan stok sesuai data lama
+      _cariStok(lama.jenisBarang).tersalur -= lama.jumlah;
+      // 2) kurangi stok sesuai data baru (barang bisa saja berganti)
+      _cariStok(baru.jenisBarang).tersalur += baru.jumlah;
+      // 3) ganti catatan di posisi yang sama
+      final i = _riwayat.indexOf(lama);
+      if (i != -1) _riwayat[i] = baru;
+    });
+
+    _snack('Penyaluran berhasil diperbarui', Colors.green);
   }
 
   // Hapus catatan (FR-27), stok dikembalikan
   void _hapus(Penyaluran p) {
     setState(() {
-      _stok.firstWhere((b) => b.nama == p.jenisBarang).tersalur -= p.jumlah;
+      _cariStok(p.jenisBarang).tersalur -= p.jumlah;
       _riwayat.remove(p);
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Catatan penyaluran dihapus')));
+    _snack(
+      'Catatan penyaluran dihapus',
+      const Color.fromARGB(255, 190, 26, 14),
+    );
   }
 
   Widget _banner() {
@@ -125,60 +154,87 @@ class _DaftarPenyaluranScreenState extends State<DaftarPenyaluranScreen> {
     );
   }
 
-  Widget _kartu(Penyaluran p) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
+  // Thumbnail: foto asli kalau ada, ikon kalau tidak
+  Widget _thumbnail(Penyaluran p) {
+    final ikon = Container(
+      width: 52,
+      height: 52,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: warnaSoft,
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: warnaSoft,
-              borderRadius: BorderRadius.circular(8),
+      child: Icon(Icons.inventory_2_outlined, color: warnaUtama),
+    );
+
+    if (p.fotoPath == null) return ikon;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.file(
+        File(p.fotoPath!),
+        width: 52,
+        height: 52,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => ikon,
+      ),
+    );
+  }
+
+  Widget _kartu(Penyaluran p) {
+    return InkWell(
+      onTap: () => _edit(p),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          children: [
+            _thumbnail(p),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    p.namaPenerima,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${p.jenisBarang} · ${p.jumlah} ${p.satuan}',
+                    style: const TextStyle(color: warnaTeks2, fontSize: 13),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.schedule, size: 13, color: warnaTeks2),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Tersalurkan · ${_jam(p.tanggal)}',
+                        style: const TextStyle(color: warnaTeks2, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            child: Icon(
-              p.adaFoto ? Icons.photo_camera : Icons.inventory_2_outlined,
-              color: warnaUtama,
+            IconButton(
+              tooltip: 'Edit',
+              style: IconButton.styleFrom(backgroundColor: warnaSoft),
+              icon: const Icon(Icons.edit_outlined, color: warnaUtama),
+              onPressed: () => _edit(p),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  p.namaPenerima,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${p.jenisBarang} · ${p.jumlah} ${p.satuan}',
-                  style: const TextStyle(color: warnaTeks2, fontSize: 13),
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.schedule, size: 13, color: warnaTeks2),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Tersalurkan · ${_jam(p.tanggal)}',
-                      style: const TextStyle(color: warnaTeks2, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: 'Hapus',
+              style: IconButton.styleFrom(backgroundColor: warnaSoft),
+              icon: const Icon(Icons.delete_outline, color: warnaUtama),
+              onPressed: () => _hapus(p),
             ),
-          ),
-          IconButton(
-            style: IconButton.styleFrom(backgroundColor: warnaSoft),
-            icon: const Icon(Icons.delete_outline, color: warnaUtama),
-            onPressed: () => _hapus(p),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -249,6 +305,31 @@ class _DaftarPenyaluranScreenState extends State<DaftarPenyaluranScreen> {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Tambah'),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 4,
+        selectedItemColor: warnaUtama,
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        selectedFontSize: 11,
+        unselectedFontSize: 11,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long_outlined),
+            label: 'Kebutuhan',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.sync), label: 'Antrean'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.inventory_2),
+            label: 'Distribusi',
+          ),
+        ],
       ),
     );
   }
