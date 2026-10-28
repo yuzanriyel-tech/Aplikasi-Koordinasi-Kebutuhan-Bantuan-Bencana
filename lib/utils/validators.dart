@@ -43,12 +43,13 @@ class Validators {
     return null;
   }
 
-  static String? quantity(String? value) {
+    static String? quantity(String? value) {
     final requiredError = requiredField(value, fieldName: 'Jumlah');
     if (requiredError != null) return requiredError;
     final number = int.tryParse(value!.trim());
-    if (number == null) return 'Jumlah harus berupa angka';
+    if (number == null) return 'Jumlah harus berupa angka bulat';
     if (number <= 0) return 'Jumlah harus lebih dari 0';
+    if (number > 100000) return 'Jumlah maksimal 100.000';
     return null;
   }
 }
