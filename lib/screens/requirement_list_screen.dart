@@ -79,7 +79,7 @@ class _RequirementListScreenState extends State<RequirementListScreen> {
       body: SafeArea(child: _buildContent()),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, AppRoutes.requirementInput),
-        backgroundColor: AppColors.primary,
+        backgroundColor: const Color.fromARGB(255, 223, 35, 113),
         foregroundColor: AppColors.surface,
         shape: const CircleBorder(),
         tooltip: 'Tambah kebutuhan',
@@ -172,7 +172,7 @@ class _FilterPill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 18),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : AppColors.surface,
+            color: selected ? const Color.fromARGB(255, 235, 66, 207) : AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: selected ? null : Border.all(color: AppColors.borderStrong),
           ),
