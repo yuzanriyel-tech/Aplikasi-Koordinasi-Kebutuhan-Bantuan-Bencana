@@ -97,5 +97,23 @@ void main() {
       expect(find.text('Jumlah wajib diisi'), findsOneWidget);
       expect(find.text('Pilih tingkat urgensi'), findsOneWidget);
     });
+        testWidgets('form tambah menolak isian kosong', (tester) async {
+      await tester.pumpWidget(
+        const PoskoSyncApp(initialRoute: AppRoutes.requirementInput),
+      );
+
+      await tester.ensureVisible(find.text('Simpan di Perangkat'));
+      await tester.pump();
+      await tester.tap(find.text('Simpan di Perangkat'));
+      await tester.pump();
+
+      expect(find.text('Jenis barang wajib diisi'), findsOneWidget);
+      expect(find.text('Jumlah wajib diisi'), findsOneWidget);
+      expect(find.text('Pilih tingkat urgensi'), findsOneWidget);
+
+      // Daftar kebutuhan di bawah form punya timer 1 detik (fetchItems);
+      // biarkan selesai agar tidak ada timer tersisa saat tes berakhir.
+      await tester.pump(const Duration(seconds: 2));
+    });
   });
 }

@@ -1,9 +1,9 @@
-import 'package:first_project/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import '../modules/queue/screens/queue_list_screen.dart';
 
 import '../data/item_repository.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import '../utils/view_status.dart';
 import '../widgets/posko_bottom_nav.dart';
 import '../widgets/posko_widgets.dart';

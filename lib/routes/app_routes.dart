@@ -14,6 +14,7 @@ import '../screens/queue_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/requirement_form_screen.dart';
 import '../screens/requirement_list_screen.dart';
+import '../screens/riwayat_laporan_page.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -63,14 +64,7 @@ class AppRoutes {
       case queue:
         return _page<void>(settings, const QueueScreen());
       case history:
-        return _page<void>(
-          settings,
-          const PlaceholderScreen(
-            title: 'Riwayat',
-            navIndex: 3,
-            icon: Icons.schedule,
-          ),
-        );
+        return _page<void>(settings, const RiwayatLaporanPage());
       case distribution:
         return _page<void>(
           settings,
@@ -89,7 +83,7 @@ class AppRoutes {
       case catatanForm:
         return _page<String>(settings, const CatatanFormScreen());
       default:
-        return null; 
+        return null;
     }
   }
 
