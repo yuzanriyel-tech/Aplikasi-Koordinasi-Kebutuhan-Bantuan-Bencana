@@ -9,13 +9,12 @@ import '../screens/landing_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/map_picker_screen.dart';
 import '../screens/not_found_screen.dart';
-import '../screens/placeholder_screen.dart';
 import '../screens/queue_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/requirement_form_screen.dart';
 import '../screens/requirement_list_screen.dart';
 import '../screens/riwayat_laporan_page.dart';
-
+import '../screens/daftar_penyaluran_screen.dart';
 class AppRoutes {
   AppRoutes._();
 
@@ -65,15 +64,8 @@ class AppRoutes {
         return _page<void>(settings, const QueueScreen());
       case history:
         return _page<void>(settings, const RiwayatLaporanPage());
-      case distribution:
-        return _page<void>(
-          settings,
-          const PlaceholderScreen(
-            title: 'Distribusi',
-            navIndex: 4,
-            icon: Icons.inventory_2_outlined,
-          ),
-        );
+              case distribution:
+          return _page<void>(settings, const DaftarPenyaluranScreen());
       case detail:
         final args = settings.arguments;
         if (args is Item) {
