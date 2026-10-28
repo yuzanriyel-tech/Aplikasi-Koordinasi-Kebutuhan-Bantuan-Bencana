@@ -1,4 +1,6 @@
+import 'package:first_project/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
+import '../modules/queue/screens/queue_list_screen.dart';
 
 import '../data/item_repository.dart';
 import '../theme/app_colors.dart';
@@ -51,6 +53,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.surface,
+        title: const Text('PoskoSync', style: AppTextStyles.button),
+        actions: [
+          IconButton(
+            tooltip: 'Antrean',
+            icon: const Icon(Icons.sync_alt),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const QueueListScreen()),
+            ),
+          ),
+          const Padding(padding: EdgeInsets.only(right: 20), child: ConnectionStatus()),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
